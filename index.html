@@ -13,30 +13,39 @@ function isAndroid() {
     return /Android/i.test(navigator.userAgent);
 }
 
-// ---- REDIRECT LOGIC ----
-window.onload = function () {
-    const iosUrl = "Shiba.usdz";
-    const androidUrl = "shiba.glb";
+document.getElementById("open").addEventListener("click", () => {
+    const a = document.createElement("a");
+    a.setAttribute("rel", "ar");
+    a.setAttribute("href", "model.usdz");
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+}
 
-    if (isIOS()) {
-        // Opens AR Quick Look directly
-        //window.location.href = iosUrl;
-        const a = document.createElement("a");
-        a.setAttribute("rel", "ar");
-        a.setAttribute("href", iosUrl);
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-    } else if (isAndroid()) {
-        // Opens Google Scene Viewer
-        window.location.href =
-            "https://arvr.google.com/scene-viewer/1.0?file=" +
-            androidUrl +
-            "&mode=ar_preferred";
-    } else {
-        // Desktop fallback (optional)
-        document.getElementById("fallback").style.display = "block";
-    }
+// ---- REDIRECT LOGIC ----
+// window.onload = function () {
+//     const iosUrl = "Shiba.usdz";
+//     const androidUrl = "shiba.glb";
+
+//     if (isIOS()) {
+//         // Opens AR Quick Look directly
+//         //window.location.href = iosUrl;
+//         const a = document.createElement("a");
+//         a.setAttribute("rel", "ar");
+//         a.setAttribute("href", iosUrl);
+//         document.body.appendChild(a);
+//         a.click();
+//         a.remove();
+//     } else if (isAndroid()) {
+//         // Opens Google Scene Viewer
+//         window.location.href =
+//             "https://arvr.google.com/scene-viewer/1.0?file=" +
+//             androidUrl +
+//             "&mode=ar_preferred";
+//     } else {
+//         // Desktop fallback (optional)
+//         document.getElementById("fallback").style.display = "block";
+//     }
 };
 </script>
 
@@ -49,6 +58,8 @@ body {
 </style>
 </head>
 <body>
+
+<button id="open">Open AR</button>
 
 <h2 id="fallback" style="display:none;">
     This AR model can be viewed on iOS or Android phones.
