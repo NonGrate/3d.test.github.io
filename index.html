@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AR Model Loader</title>
+<script>
+// ---- DEVICE DETECTION ----
+function isIOS() {
+    return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+function isAndroid() {
+    return /Android/i.test(navigator.userAgent);
+}
+
+// ---- REDIRECT LOGIC ----
+window.onload = function () {
+    const iosUrl = "model.usdz";
+    const androidUrl = "model.glb";
+
+    if (isIOS()) {
+        // Opens AR Quick Look directly
+        window.location.href = iosUrl;
+    } else if (isAndroid()) {
+        // Opens Google Scene Viewer
+        window.location.href =
+            "https://arvr.google.com/scene-viewer/1.0?file=" +
+            androidUrl +
+            "&mode=ar_preferred";
+    } else {
+        // Desktop fallback (optional)
+        document.getElementById("fallback").style.display = "block";
+    }
+};
+</script>
+
+<style>
+body {
+    font-family: sans-serif;
+    text-align: center;
+    padding-top: 60px;
+}
+</style>
+</head>
+<body>
+
+<h2 id="fallback" style="display:none;">
+    This AR model can be viewed on iOS or Android phones.
+</h2>
+
+</body>
+</html>
