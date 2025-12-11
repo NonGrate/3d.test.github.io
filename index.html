@@ -14,12 +14,23 @@ function isAndroid() {
 }
 
 document.getElementById("open").addEventListener("click", () => {
-    const a = document.createElement("a");
-    a.setAttribute("rel", "ar");
-    a.setAttribute("href", "model.usdz");
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    const iosUrl = "Shiba.usdz";
+    const androidUrl = "shiba.glb";
+
+    if (isIOS()) {
+        const a = document.createElement("a");
+        a.setAttribute("rel", "ar");
+        a.setAttribute("href", iosUrl);
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+    } else if (isAndroid()) {
+        // Opens Google Scene Viewer
+        window.location.href =
+            "https://arvr.google.com/scene-viewer/1.0?file=" +
+            androidUrl +
+            "&mode=ar_preferred";
+    }
 }
 
 // ---- REDIRECT LOGIC ----
