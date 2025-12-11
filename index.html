@@ -20,7 +20,13 @@ window.onload = function () {
 
     if (isIOS()) {
         // Opens AR Quick Look directly
-        window.location.href = iosUrl;
+        //window.location.href = iosUrl;
+        const a = document.createElement("a");
+        a.setAttribute("rel", "ar");
+        a.setAttribute("href", iosUrl);
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
     } else if (isAndroid()) {
         // Opens Google Scene Viewer
         window.location.href =
