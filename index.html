@@ -24,10 +24,8 @@ function openAR(model) {
         a.click();
         a.remove();
     } else if (isAndroid()) {
-        window.location.href =
-            "https://arvr.google.com/scene-viewer/1.0?file=" +
-            androidUrl +
-            "&mode=ar_preferred";
+        const file = encodeURIComponent(window.location.origin + '/' + androidUrl);
+        window.location.href = `intent://arvr.google.com/scene-viewer/1.0?file=${file}&mode=ar_preferred#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;end;`;
     } else {
         alert("AR viewing is only supported on iOS and Android devices.");
     }
