@@ -15,7 +15,7 @@ function isAndroid() {
 
 function openAR(model) {
     const iosUrl = model + '.usdz';
-    const androidUrl = model + '.glb';
+    const androidUrl = window.location.origin + '/' + model + '.glb'; // full https URL
     if (isIOS()) {
         const a = document.createElement("a");
         a.setAttribute("rel", "ar");
@@ -24,8 +24,12 @@ function openAR(model) {
         a.click();
         a.remove();
     } else if (isAndroid()) {
-        const file = encodeURIComponent(window.location.origin + '/' + androidUrl);
-        window.location.href = `intent://arvr.google.com/scene-viewer/1.0?file=${file}&mode=ar_preferred#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;end;`;
+        const fileUrl = encodeURIComponent(androidUrl); // must be FULL https URL to the .glb
+        const fallback = encodeURIComponent(window.location.href); // or a dedicated fallback page
+        window.location.href =
+          `intent://arvr.google.com/scene-viewer/1.0?file=${fileUrl}&mode=ar_preferred` +
+          `#Intent;scheme=https;package=com.google.android.googlequicksearchbox;` +
+          `action=android.intent.action.VIEW;S.browser_fallback_url=${fallback};end;`;
     } else {
         alert("AR viewing is only supported on iOS and Android devices.");
     }
