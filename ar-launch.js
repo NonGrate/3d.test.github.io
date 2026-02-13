@@ -17,8 +17,8 @@ function openAR(model, isAuto = false) {
         a.remove();
     } else if (isAndroid()) {
         const fileUrl = encodeURIComponent(androidUrl);
-        // Use index.html as fallback to avoid infinite reload
-        const fallback = encodeURIComponent(window.location.origin + '/index.html');
+        // Use the current page as fallback to allow manual retry
+        const fallback = encodeURIComponent(window.location.href + (window.location.search ? '&' : '?') + 'fallback=1');
         window.location.href =
           `intent://arvr.google.com/scene-viewer/1.0?file=${fileUrl}&mode=ar_preferred` +
           `#Intent;scheme=https;package=com.google.android.googlequicksearchbox;` +
@@ -27,4 +27,3 @@ function openAR(model, isAuto = false) {
         alert("AR viewing is only supported on iOS and Android devices.");
     }
 }
-
