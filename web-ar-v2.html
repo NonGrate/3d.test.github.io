@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web AR v2</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="viewer-page">
+<div class="viewer-header">
+  <h1 id="viewerTitle">Web AR v2</h1>
+  <p>Three.js renderer with optional WebXR AR (no Scene Viewer / Quick Look handoff).</p>
+  <div class="viewer-actions">
+    <a href="index.html" class="link-button">Back to model list</a>
+  </div>
+</div>
+<div id="viewerContainer" class="viewer-container"></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.164.1/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.164.1/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { ARButton } from 'three/addons/webxr/ARButton.js';
+
+const params = new URLSearchParams(window.location.search);
+const requestedModel = params.get('model') || 'Shiba';
+const modelFile = `${requestedModel}.glb`;
+
+document.getElementById('viewerTitle').textContent = `${requestedModel} — Web AR v2`;
+
+const container = document.getElementById('viewerContainer');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xe9eef5);
+
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.01, 100);
+camera.position.set(0, 1.4, 2.8);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.xr.enabled = true;
+container.appendChild(renderer.domElement);
+
+const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.2);
+hemiLight.position.set(0, 20, 0);
+scene.add(hemiLight);
+
+const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+dirLight.position.set(3, 10, 2);
+scene.add(dirLight);
+
+const ground = new THREE.Mesh(
+  new THREE.CircleGeometry(2, 64),
+  new THREE.MeshStandardMaterial({ color: 0xd7d7d7, roughness: 0.95, metalness: 0.05 })
+);
+ground.rotation.x = -Math.PI / 2;
+ground.position.y = -0.01;
+scene.add(ground);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 0.5, 0);
+controls.enableDamping = true;
+controls.update();
+
+const loader = new GLTFLoader();
+loader.load(
+  modelFile,
+  (gltf) => {
+    const root = gltf.scene;
+
+    const box = new THREE.Box3().setFromObject(root);
+    const size = box.getSize(new THREE.Vector3());
+    const maxSide = Math.max(size.x, size.y, size.z) || 1;
+    const scale = 1 / maxSide;
+    root.scale.setScalar(scale);
+
+    box.setFromObject(root);
+    const center = box.getCenter(new THREE.Vector3());
+    root.position.sub(center);
+    root.position.y += (box.getSize(new THREE.Vector3()).y * 0.5);
+
+    scene.add(root);
+  },
+  undefined,
+  (error) => {
+    console.error(`Failed to load ${modelFile}`, error);
+    alert(`Could not load ${modelFile}. Make sure the GLB exists at the site root.`);
+  }
+);
+
+if (navigator.xr) {
+  navigator.xr.isSessionSupported('immersive-ar').then((supported) => {
+    if (supported) {
+      const arButton = ARButton.createButton(renderer, {
+        requiredFeatures: ['hit-test'],
+        optionalFeatures: ['dom-overlay'],
+        domOverlay: { root: document.body }
+      });
+      arButton.classList.add('ar-v2-button');
+      document.body.appendChild(arButton);
+    }
+  }).catch((err) => {
+    console.warn('WebXR support check failed.', err);
+  });
+}
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+renderer.setAnimationLoop(() => {
+  controls.update();
+  renderer.render(scene, camera);
+});
+</script>
+</body>
+</html>
