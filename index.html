@@ -7,7 +7,14 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<button onclick="openAR('Shiba')">shiba</button>
-<button onclick="openAR('Island')">island</button>
+<h1>AR Model Loader</h1>
+<div class="button-group">
+  <button onclick="openAR('Shiba')">Shiba (Native AR)</button>
+  <button onclick="openAR('Island')">Island (Native AR)</button>
+</div>
+<div class="button-group">
+  <button onclick="openARv2('Shiba')">Shiba (AR v2 Web Renderer)</button>
+  <button onclick="openARv2('Island')">Island (AR v2 Web Renderer)</button>
+</div>
 </body>
 </html>
