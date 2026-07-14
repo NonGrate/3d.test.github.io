@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Solar System AR Model</title>
+<script src="ar-launch.js"></script>
+<link rel="stylesheet" href="style.css">
+<script>
+window.onload = function() {
+    // Only auto-launch if not coming from fallback
+    if (!window.location.search.includes('fallback')) {
+        openAR('Solar_System_Animated_Rigged', true);
+    }
+};
+</script>
+</head>
+<body>
+<p>Launching Solar System AR model...</p>
+<p>If the AR viewer does not open automatically, tap the button below.</p>
+<a rel="ar" href="Solar_System_Animated_Rigged.usdz">
+  <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" alt="Launch Solar System AR">
+</a>
+<button onclick="openAR('Solar_System_Animated_Rigged')">Launch Solar System AR manually</button>
+</body>
+</html>
