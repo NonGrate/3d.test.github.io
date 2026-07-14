@@ -15,6 +15,14 @@ function openAR(model, isAuto = false) {
         const a = document.createElement('a');
         a.setAttribute('rel', 'ar');
         a.setAttribute('href', iosUrl);
+
+        // iOS AR Quick Look requires a rel="ar" link with a child image/picture.
+        // Without the child, Safari can treat the USDZ as a normal download.
+        const img = document.createElement('img');
+        img.setAttribute('alt', 'Open model in AR');
+        img.style.display = 'none';
+        a.appendChild(img);
+
         document.body.appendChild(a);
         a.click();
         a.remove();
