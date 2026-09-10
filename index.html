@@ -1,21 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>AR Model Loader</title>
-<script src="ar-launch.js"></script>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AR Tracking Test Lab</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-<body>
-<h1>AR Model Loader</h1>
-<div class="button-group">
-  <button onclick="openAR('Shiba')">Shiba (Native AR)</button>
-  <button onclick="openAR('Island')">Island (Native AR)</button>
-  <button onclick="openAR('Solar_System_Animated_Rigged')">Solar System (Native AR)</button>
-</div>
-<div class="button-group">
-  <button onclick="openARv2('Shiba')">Shiba (AR v2 Web Renderer)</button>
-  <button onclick="openARv2('Island')">Island (AR v2 Web Renderer)</button>
-</div>
+<body class="landing-page">
+  <main class="landing-shell">
+    <p class="eyebrow">Manual device test</p>
+    <h1>Choose a model</h1>
+    <p class="intro">Select a model first. Its test page will let you launch every AR solution currently available for that model.</p>
+
+    <section class="model-grid" aria-label="Models available for testing">
+      <article class="model-card">
+        <div class="model-symbol" aria-hidden="true">🐕</div>
+        <div>
+          <span class="badge">3 solutions</span>
+          <h2>Shiba</h2>
+          <p>Test the animated dog with world tracking, marker tracking, or the native device viewer.</p>
+        </div>
+        <a class="primary-action stretched-action" href="shiba.html">Choose Shiba <span aria-hidden="true">→</span></a>
+      </article>
+
+      <article class="model-card">
+        <div class="model-symbol" aria-hidden="true">🏝️</div>
+        <div>
+          <span class="badge">3 solutions</span>
+          <h2>Island</h2>
+          <p>Compare tracking behavior with the detailed island environment.</p>
+        </div>
+        <a class="primary-action stretched-action" href="island.html">Choose Island <span aria-hidden="true">→</span></a>
+      </article>
+
+      <article class="model-card">
+        <div class="model-symbol" aria-hidden="true">🪐</div>
+        <div>
+          <span class="badge">3 solutions</span>
+          <h2>Solar System</h2>
+          <p>Test the larger animated solar-system scene across all supported viewers.</p>
+        </div>
+        <a class="primary-action stretched-action" href="solar-system.html">Choose Solar System <span aria-hidden="true">→</span></a>
+      </article>
+    </section>
+  </main>
 </body>
 </html>
