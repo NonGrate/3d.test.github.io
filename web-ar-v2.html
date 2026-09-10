@@ -1,128 +1,222 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Web AR v2</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <title>WebXR World Tracking Test</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-<body class="viewer-page">
-<div class="viewer-header">
-  <h1 id="viewerTitle">Web AR v2</h1>
-  <p>Three.js renderer with optional WebXR AR (no Scene Viewer / Quick Look handoff).</p>
-  <div class="viewer-actions">
-    <a href="index.html" class="link-button">Back to model list</a>
-  </div>
-</div>
-<div id="viewerContainer" class="viewer-container"></div>
+<body class="ar-test-page webxr-page">
+  <div id="viewerContainer" class="viewer-container"></div>
+  <div class="goggles-overlay" aria-hidden="true"><span></span></div>
+  <header class="ar-topbar">
+    <a href="index.html" id="modelBackLink" class="icon-action" aria-label="Back to model solutions">←</a>
+    <div><strong>WebXR world test</strong><small id="trackingState">Loading model…</small></div>
+    <button id="resetPlacement" class="compact-action" disabled>Reset</button>
+  </header>
 
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://unpkg.com/three@0.164.1/build/three.module.js",
-    "three/addons/": "https://unpkg.com/three@0.164.1/examples/jsm/"
+  <div id="unsupportedMessage" class="camera-message" role="status">Checking immersive AR support…</div>
+
+  <section class="story-panel" aria-label="AR information">
+    <div class="story-meta"><span>Field notes</span><span data-page-count></span></div>
+    <p data-page-text></p>
+    <div class="story-actions">
+      <button data-page-previous aria-label="Previous page">←</button>
+      <button data-audio-restart>Play audio</button>
+      <button data-page-next aria-label="Next page">→</button>
+    </div>
+  </section>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.164.1/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.164.1/examples/jsm/"
+    }
   }
-}
-</script>
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { ARButton } from 'three/addons/webxr/ARButton.js';
 
-<script type="module">
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { ARButton } from 'three/addons/webxr/ARButton.js';
+    const modelOptions = {
+      Shiba: { file: 'Shiba.glb', size: 0.8 },
+      Island: { file: 'Island.glb', size: 1.2 },
+      Solar_System_Animated_Rigged: { file: 'Solar_System_Animated_Rigged.glb', size: 1.1 }
+    };
+    const requested = new URLSearchParams(location.search).get('model');
+    const selected = modelOptions[requested] || modelOptions.Shiba;
+    const modelPages = { Shiba: 'shiba.html', Island: 'island.html', Solar_System_Animated_Rigged: 'solar-system.html' };
+    document.getElementById('modelBackLink').href = modelPages[requested] || modelPages.Shiba;
+    const container = document.getElementById('viewerContainer');
+    const status = document.getElementById('trackingState');
+    const message = document.getElementById('unsupportedMessage');
+    const resetButton = document.getElementById('resetPlacement');
 
-const params = new URLSearchParams(window.location.search);
-const requestedModel = params.get('model') || 'Shiba';
-const modelFile = `${requestedModel}.glb`;
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x071b2e);
+    const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.01, 100);
+    camera.position.set(0, 1.2, 2.5);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.setSize(innerWidth, innerHeight);
+    renderer.xr.enabled = true;
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    container.appendChild(renderer.domElement);
 
-document.getElementById('viewerTitle').textContent = `${requestedModel} — Web AR v2`;
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x304050, 2.2));
+    const keyLight = new THREE.DirectionalLight(0xffffff, 2.5);
+    keyLight.position.set(2, 4, 2);
+    scene.add(keyLight);
 
-const container = document.getElementById('viewerContainer');
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xe9eef5);
+    const previewGround = new THREE.Mesh(
+      new THREE.CircleGeometry(1.5, 64),
+      new THREE.MeshStandardMaterial({ color: 0x153c54, roughness: 0.8 })
+    );
+    previewGround.rotation.x = -Math.PI / 2;
+    scene.add(previewGround);
 
-const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.01, 100);
-camera.position.set(0, 1.4, 2.8);
+    const reticle = new THREE.Mesh(
+      new THREE.RingGeometry(0.07, 0.09, 32).rotateX(-Math.PI / 2),
+      new THREE.MeshBasicMaterial({ color: 0x63e6d5 })
+    );
+    reticle.matrixAutoUpdate = false;
+    reticle.visible = false;
+    scene.add(reticle);
 
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-renderer.setPixelRatio(window.devicePixelRatio);
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.xr.enabled = true;
-container.appendChild(renderer.domElement);
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.target.set(0, 0.4, 0);
+    controls.enableDamping = true;
+    let model;
+    const placementRoot = new THREE.Group();
+    scene.add(placementRoot);
+    let mixer;
+    let hitTestSource;
+    let hitTestRequested = false;
+    let placed = false;
 
-const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.2);
-hemiLight.position.set(0, 20, 0);
-scene.add(hemiLight);
+    new GLTFLoader().load(selected.file, (gltf) => {
+      model = gltf.scene;
+      const bounds = new THREE.Box3().setFromObject(model);
+      const size = bounds.getSize(new THREE.Vector3());
+      model.scale.setScalar(selected.size / (Math.max(size.x, size.y, size.z) || 1));
+      bounds.setFromObject(model);
+      const center = bounds.getCenter(new THREE.Vector3());
+      model.position.sub(center);
+      model.position.y += bounds.getSize(new THREE.Vector3()).y / 2;
+      placementRoot.add(model);
+      if (gltf.animations.length) {
+        mixer = new THREE.AnimationMixer(model);
+        gltf.animations.forEach((clip) => mixer.clipAction(clip).play());
+      }
+      status.textContent = 'Preview ready';
+      configureAR();
+    }, (event) => {
+      if (event.total) status.textContent = `Loading ${Math.round(event.loaded / event.total * 100)}%`;
+    }, () => {
+      status.textContent = 'Model failed to load';
+      message.textContent = `Could not load ${selected.file}.`;
+    });
 
-const dirLight = new THREE.DirectionalLight(0xffffff, 1);
-dirLight.position.set(3, 10, 2);
-scene.add(dirLight);
+    async function configureAR() {
+      if (!navigator.xr) {
+        message.textContent = 'WebXR is unavailable here. Try the marker test for iPhone/iPad.';
+        return;
+      }
+      let supported = false;
+      try { supported = await navigator.xr.isSessionSupported('immersive-ar'); } catch {}
+      if (!supported) {
+        message.textContent = 'Immersive AR is not supported by this browser. Try the marker test instead.';
+        return;
+      }
 
-const ground = new THREE.Mesh(
-  new THREE.CircleGeometry(2, 64),
-  new THREE.MeshStandardMaterial({ color: 0xd7d7d7, roughness: 0.95, metalness: 0.05 })
-);
-ground.rotation.x = -Math.PI / 2;
-ground.position.y = -0.01;
-scene.add(ground);
-
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.target.set(0, 0.5, 0);
-controls.enableDamping = true;
-controls.update();
-
-const loader = new GLTFLoader();
-loader.load(
-  modelFile,
-  (gltf) => {
-    const root = gltf.scene;
-
-    const box = new THREE.Box3().setFromObject(root);
-    const size = box.getSize(new THREE.Vector3());
-    const maxSide = Math.max(size.x, size.y, size.z) || 1;
-    const scale = 1 / maxSide;
-    root.scale.setScalar(scale);
-
-    box.setFromObject(root);
-    const center = box.getCenter(new THREE.Vector3());
-    root.position.sub(center);
-    root.position.y += (box.getSize(new THREE.Vector3()).y * 0.5);
-
-    scene.add(root);
-  },
-  undefined,
-  (error) => {
-    console.error(`Failed to load ${modelFile}`, error);
-    alert(`Could not load ${modelFile}. Make sure the GLB exists at the site root.`);
-  }
-);
-
-if (navigator.xr) {
-  navigator.xr.isSessionSupported('immersive-ar').then((supported) => {
-    if (supported) {
-      const arButton = ARButton.createButton(renderer, {
+      message.textContent = 'Press Start AR, move the phone slowly, then tap the turquoise ring.';
+      const button = ARButton.createButton(renderer, {
         requiredFeatures: ['hit-test'],
-        optionalFeatures: ['dom-overlay'],
+        optionalFeatures: ['dom-overlay', 'local-floor'],
         domOverlay: { root: document.body }
       });
-      arButton.classList.add('ar-v2-button');
-      document.body.appendChild(arButton);
+      button.classList.add('launch-ar-button');
+      document.body.appendChild(button);
     }
-  }).catch((err) => {
-    console.warn('WebXR support check failed.', err);
-  });
-}
 
-window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-});
+    const controller = renderer.xr.getController(0);
+    controller.addEventListener('select', () => {
+      if (!reticle.visible || !model) return;
+      placementRoot.position.setFromMatrixPosition(reticle.matrix);
+      placementRoot.quaternion.setFromRotationMatrix(reticle.matrix);
+      placementRoot.visible = true;
+      placed = true;
+      resetButton.disabled = false;
+      status.textContent = 'Placed — walk around the model';
+    });
+    scene.add(controller);
 
-renderer.setAnimationLoop(() => {
-  controls.update();
-  renderer.render(scene, camera);
-});
-</script>
+    resetButton.addEventListener('click', () => {
+      placed = false;
+      placementRoot.visible = false;
+      resetButton.disabled = true;
+      status.textContent = 'Move slowly to find a surface';
+    });
+
+    renderer.xr.addEventListener('sessionstart', () => {
+      scene.background = null;
+      previewGround.visible = false;
+      placementRoot.visible = false;
+      controls.enabled = false;
+      message.hidden = true;
+      status.textContent = 'Move slowly to find a surface';
+    });
+    renderer.xr.addEventListener('sessionend', () => {
+      hitTestSource = null;
+      hitTestRequested = false;
+      placed = false;
+      reticle.visible = false;
+      scene.background = new THREE.Color(0x071b2e);
+      previewGround.visible = true;
+      placementRoot.visible = true;
+      placementRoot.position.set(0, 0, 0);
+      placementRoot.quaternion.identity();
+      controls.enabled = true;
+      status.textContent = 'Preview ready';
+    });
+
+    const clock = new THREE.Clock();
+    renderer.setAnimationLoop((time, frame) => {
+      if (frame) {
+        const session = renderer.xr.getSession();
+        if (!hitTestRequested) {
+          session.requestReferenceSpace('viewer')
+            .then((space) => session.requestHitTestSource({ space }))
+            .then((source) => { hitTestSource = source; })
+            .catch(() => { status.textContent = 'Surface tracking could not start'; });
+          session.addEventListener('end', () => { hitTestRequested = false; hitTestSource = null; });
+          hitTestRequested = true;
+        }
+        if (hitTestSource) {
+          const hits = frame.getHitTestResults(hitTestSource);
+          reticle.visible = hits.length > 0 && !placed;
+          if (hits.length && !placed) {
+            const pose = hits[0].getPose(renderer.xr.getReferenceSpace());
+            reticle.matrix.fromArray(pose.transform.matrix);
+            status.textContent = 'Surface found — tap the ring to place';
+          }
+        }
+      } else {
+        controls.update();
+      }
+      if (mixer) mixer.update(clock.getDelta());
+      renderer.render(scene, camera);
+    });
+
+    addEventListener('resize', () => {
+      camera.aspect = innerWidth / innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(innerWidth, innerHeight);
+    });
+  </script>
+  <script src="experience-ui.js"></script>
 </body>
 </html>
