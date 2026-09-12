@@ -1,46 +1,53 @@
-// AR launch logic for all pages
 function isIOS() {
-    return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  return /iPhone|iPad|iPod/i.test(navigator.userAgent)
+    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 }
 
 function isAndroid() {
-    return /Android/i.test(navigator.userAgent);
+  return /Android/i.test(navigator.userAgent);
 }
 
-function openAR(model, isAuto = false) {
-    const iosUrl = model + '.usdz';
-    const androidUrl = window.location.origin + '/' + model + '.glb';
+function openAR(model) {
+  if (isIOS()) {
+    const link = document.createElement('a');
+    link.rel = 'ar';
+    link.href = new URL(`${model}.usdz`, window.location.href).href;
 
-    if (isIOS()) {
-        const a = document.createElement('a');
-        a.setAttribute('rel', 'ar');
-        a.setAttribute('href', iosUrl);
+    // Safari requires an image inside the link to launch AR Quick Look.
+    const image = document.createElement('img');
+    image.alt = '';
+    link.appendChild(image);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    return;
+  }
 
-        // iOS AR Quick Look requires a rel="ar" link with a child image/picture.
-        // Without the child, Safari can treat the USDZ as a normal download.
-        const img = document.createElement('img');
-        img.setAttribute('alt', 'Open model in AR');
-        img.style.display = 'none';
-        a.appendChild(img);
-
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-    } else if (isAndroid()) {
-        const fileUrl = encodeURIComponent(androidUrl);
-        // Use the current page as fallback to allow manual retry
-        const fallback = encodeURIComponent(window.location.href + (window.location.search ? '&' : '?') + 'fallback=1');
-        window.location.href =
-            `intent://arvr.google.com/scene-viewer/1.0?file=${fileUrl}&mode=ar_preferred` +
-            `#Intent;scheme=https;package=com.google.android.googlequicksearchbox;` +
-            `action=android.intent.action.VIEW;S.browser_fallback_url=${fallback};end;`;
-    } else if (!isAuto) {
-        alert('Native AR viewing is only supported on iOS and Android devices.');
-    }
+  if (isAndroid()) {
+    const modelUrl = encodeURIComponent(new URL(`${model}.glb`, window.location.href).href);
+    const fallbackUrl = encodeURIComponent(window.location.href);
+    window.location.href = `intent://arvr.google.com/scene-viewer/1.0?file=${modelUrl}&mode=ar_preferred`
+      + '#Intent;scheme=https;package=com.google.android.googlequicksearchbox;'
+      + `action=android.intent.action.VIEW;S.browser_fallback_url=${fallbackUrl};end;`;
+  }
 }
 
-function openARv2(model) {
-    const url = new URL('web-ar-v2.html', window.location.href);
-    url.searchParams.set('model', model);
-    window.location.href = url.toString();
+function setupLauncher() {
+  const supported = isIOS() || isAndroid();
+  const message = document.getElementById('deviceMessage');
+  const buttons = document.querySelectorAll('[data-native-ar]');
+
+  if (message) {
+    message.textContent = supported
+      ? 'Ready. Choose a model below.'
+      : 'Native AR needs an iPhone, iPad, or Android device. The library previews can still be opened here.';
+    message.classList.toggle('device-warning', !supported);
+  }
+
+  buttons.forEach((button) => {
+    button.disabled = !supported;
+    button.addEventListener('click', () => openAR(button.dataset.nativeAr));
+  });
 }
+
+document.addEventListener('DOMContentLoaded', setupLauncher);

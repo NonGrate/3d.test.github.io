@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Camera AR test</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+</head>
+<body>
+  <main class="viewer-shell">
+    <header class="viewer-bar"><a href="index.html">← Back</a><div class="viewer-title"><strong>Camera AR</strong><small id="status">Loading model…</small></div><button id="cameraButton" class="camera-action" type="button">Start camera</button></header>
+    <video id="cameraFeed" class="camera-feed" autoplay muted playsinline></video>
+    <canvas id="renderCanvas" aria-label="Interactive AR scene"></canvas>
+    <p class="viewer-note"><b>Camera mode:</b> drag to rotate and pinch to zoom; this manual overlay is not floor-anchored. On WebXR devices, use the headset button for tracked placement.</p>
+  </main>
+  <script src="babylon-ar.js"></script>
+</body>
+</html>
