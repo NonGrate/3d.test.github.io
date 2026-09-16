@@ -32,17 +32,36 @@ async function createScene() {
       optionalFeatures: true
     });
     const hitTest = xr.baseExperience.featuresManager.enableFeature(BABYLON.WebXRHitTest.Name, 'latest');
-    let hitPosition = null;
+    let hitPose = null;
+    let placed = false;
     hitTest.onHitTestResultObservable.add((results) => {
       if (!results.length) return;
-      hitPosition = results[0].position;
-      statusText.textContent = 'Surface found — tap to place';
+      hitPose = results[0].transformationMatrix.clone();
+      if (!placed) statusText.textContent = 'Surface found — tap to place';
     });
     scene.onPointerDown = () => {
-      if (!hitPosition || xr.baseExperience.state !== BABYLON.WebXRState.IN_XR) return;
+      if (!hitPose || xr.baseExperience.state !== BABYLON.WebXRState.IN_XR) return;
+      const hitScale = new BABYLON.Vector3();
+      const hitRotation = new BABYLON.Quaternion();
+      const hitPosition = new BABYLON.Vector3();
+      hitPose.decompose(hitScale, hitRotation, hitPosition);
       root.position.copyFrom(hitPosition);
+      root.rotationQuaternion = hitRotation;
+      root.setEnabled(true);
+      placed = true;
       statusText.textContent = 'Placed — move around the model';
     };
+    xr.baseExperience.onStateChangedObservable.add((state) => {
+      if (state === BABYLON.WebXRState.IN_XR) {
+        placed = false;
+        hitPose = null;
+        root.setEnabled(false);
+        statusText.textContent = 'Move slowly to find a surface';
+      } else if (state === BABYLON.WebXRState.NOT_IN_XR) {
+        root.setEnabled(true);
+        statusText.textContent = `${file.replace('.glb', '').replaceAll('_', ' ')} · preview ready`;
+      }
+    });
   } catch (error) {
     statusText.textContent = 'Immersive AR unsupported — use Model Viewer instead';
   }

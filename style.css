@@ -123,6 +123,24 @@ h1 {
 
 .help p { margin: 6px 0 0; color: #657083; font-size: .92rem; line-height: 1.5; }
 
+.test-plan, .comparison {
+  margin-top: 28px;
+  padding: 20px;
+  border: 1px solid #d6dae1;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.test-plan h2, .comparison h2 { margin: 0 0 12px; font-size: 1.25rem; }
+.test-plan ol { margin: 0; padding-left: 22px; color: #374256; }
+.test-plan li + li { margin-top: 8px; }
+.test-tip { margin: 14px 0 0; color: #657083; font-size: .88rem; line-height: 1.5; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: .82rem; line-height: 1.4; }
+th, td { padding: 9px 8px; border-bottom: 1px solid #e1e4e9; text-align: left; vertical-align: top; }
+thead th { color: #526071; background: #f7f8fa; font-size: .75rem; text-transform: uppercase; }
+tbody th { color: #244f82; white-space: nowrap; }
+
 @media (min-width: 700px) {
   .mobile-shell { padding-top: 64px; }
 }

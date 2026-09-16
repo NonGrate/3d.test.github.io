@@ -51,6 +51,33 @@
       <strong>How it works</strong>
       <p><b>Model Viewer</b> supports iOS and Android, but iOS hands the scene to Quick Look. <b>Babylon.js</b> keeps the camera and model in the web page, but requires WebXR (normally Android Chrome). Camera permission is requested only after you press an AR button.</p>
     </aside>
+
+    <section class="test-plan" aria-labelledby="testPlanTitle">
+      <p class="kicker">Repeatable comparison</p>
+      <h2 id="testPlanTitle">Run the same movement test</h2>
+      <ol>
+        <li>Place the same model on a clearly textured, stationary surface.</li>
+        <li>Walk one full circle around it while keeping it in frame.</li>
+        <li>Move 2–3 metres away, return, and briefly point the camera elsewhere.</li>
+        <li>Compare drift, jitter, scale changes, and whether the model returns to the same spot.</li>
+      </ol>
+      <p class="test-tip"><b>Keep conditions equal:</b> use the same device, room, lighting, surface, model, and path for every library.</p>
+    </section>
+
+    <section class="comparison" aria-labelledby="comparisonTitle">
+      <h2 id="comparisonTitle">What each route tests</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Route</th><th>Renderer / tracker</th><th>Best comparison</th></tr></thead>
+          <tbody>
+            <tr><th>Model Viewer</th><td>WebXR or native viewer</td><td>One API across mobile platforms</td></tr>
+            <tr><th>Babylon.js</th><td>WebXR in the page</td><td>WebXR hit-test placement and world locking</td></tr>
+            <tr><th>Native viewer</th><td>Quick Look or Scene Viewer</td><td>Platform baseline without a web renderer</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="test-tip">These routes compare AR integrations, not three independent tracking systems: Model Viewer may hand off to the same native viewer used by the native baseline.</p>
+    </section>
   </main>
 </body>
 </html>
