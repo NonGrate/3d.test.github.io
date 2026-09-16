@@ -12,7 +12,7 @@
     <header>
       <p class="kicker">Mobile AR</p>
       <h1>Choose a model</h1>
-      <p class="lead">Choose a model, then compare two AR libraries with the device's native viewer. Each test clearly shows where it works.</p>
+      <p class="lead">Choose a model, then open it over a live browser camera or compare tracked AR options.</p>
     </header>
 
     <p id="deviceMessage" class="device-message" role="status">Checking this device…</p>
@@ -23,7 +23,7 @@
         <span><strong>Shiba</strong><small>Animated dog</small></span>
         <div class="test-links">
           <a href="model-viewer.html?model=Shiba">Model Viewer</a>
-          <a href="babylon-ar.html?model=Shiba">Babylon.js</a>
+          <a href="babylon-ar.html?model=Shiba">Browser camera</a>
           <button type="button" data-native-ar="Shiba">Native viewer</button>
         </div>
       </article>
@@ -32,7 +32,7 @@
         <span><strong>Island</strong><small>Island scene</small></span>
         <div class="test-links">
           <a href="model-viewer.html?model=Island">Model Viewer</a>
-          <a href="babylon-ar.html?model=Island">Babylon.js</a>
+          <a href="babylon-ar.html?model=Island">Browser camera</a>
           <button type="button" data-native-ar="Island">Native viewer</button>
         </div>
       </article>
@@ -41,7 +41,7 @@
         <span><strong>Solar system</strong><small>Animated planets</small></span>
         <div class="test-links">
           <a href="model-viewer.html?model=Solar_System_Animated_Rigged">Model Viewer</a>
-          <a href="babylon-ar.html?model=Solar_System_Animated_Rigged">Babylon.js</a>
+          <a href="babylon-ar.html?model=Solar_System_Animated_Rigged">Browser camera</a>
           <button type="button" data-native-ar="Solar_System_Animated_Rigged">Native viewer</button>
         </div>
       </article>
@@ -49,7 +49,7 @@
 
     <aside class="help">
       <strong>How it works</strong>
-      <p><b>Model Viewer</b> supports iOS and Android, but iOS hands the scene to Quick Look. <b>Babylon.js</b> keeps the camera and model in the web page, but requires WebXR (normally Android Chrome). Camera permission is requested only after you press an AR button.</p>
+      <p><b>Browser camera</b> keeps a live camera and movable 3D model in this page on iOS and Android; it is a manual overlay and is not floor-anchored. <b>Model Viewer</b> provides tracked AR, but may open Quick Look or Scene Viewer. Camera permission is requested only after you press Start camera.</p>
     </aside>
 
     <section class="test-plan" aria-labelledby="testPlanTitle">
@@ -71,7 +71,7 @@
           <thead><tr><th>Route</th><th>Renderer / tracker</th><th>Best comparison</th></tr></thead>
           <tbody>
             <tr><th>Model Viewer</th><td>WebXR or native viewer</td><td>One API across mobile platforms</td></tr>
-            <tr><th>Babylon.js</th><td>WebXR in the page</td><td>WebXR hit-test placement and world locking</td></tr>
+            <tr><th>Browser camera</th><td>Babylon.js overlay; WebXR when available</td><td>In-page camera on iOS/Android; tracked placement on WebXR</td></tr>
             <tr><th>Native viewer</th><td>Quick Look or Scene Viewer</td><td>Platform baseline without a web renderer</td></tr>
           </tbody>
         </table>

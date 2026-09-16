@@ -9,11 +9,11 @@
 </head>
 <body>
   <main class="viewer-shell">
-    <header class="viewer-bar"><a href="index.html">← Back</a><div><strong>Model Viewer</strong><small id="modelName">Loading model…</small></div></header>
+    <header class="viewer-bar"><a href="index.html">← Back</a><div class="viewer-title"><strong>Model Viewer</strong><small id="modelName">Loading model…</small></div><a id="browserCameraLink" class="camera-action" href="babylon-ar.html">Browser camera</a></header>
     <model-viewer id="viewer" camera-controls touch-action="pan-y" autoplay ar ar-modes="webxr scene-viewer quick-look" shadow-intensity="1" exposure="1">
-      <button class="ar-action" slot="ar-button">View in your space</button>
+      <button class="ar-action" slot="ar-button">Open tracked AR</button>
     </model-viewer>
-    <p class="viewer-note">Drag to rotate or pinch to zoom. Tap “View in your space” to request camera access and start AR.</p>
+    <p class="viewer-note">“Open tracked AR” may use your device's system viewer. Choose <b>Browser camera</b> above to keep the camera and 3D model on this web page.</p>
   </main>
   <script>
     const names = { Shiba: 'Shiba', Island: 'Island', Solar_System_Animated_Rigged: 'Solar system' };
@@ -23,6 +23,7 @@
     viewer.src = `${model}.glb`;
     viewer.setAttribute('ios-src', `${model}.usdz`);
     viewer.alt = `${names[model]} 3D model`;
+    document.getElementById('browserCameraLink').href = `babylon-ar.html?model=${encodeURIComponent(model)}`;
     document.getElementById('modelName').textContent = `${names[model]} · iOS and Android`;
   </script>
 </body>

@@ -3,16 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Babylon.js AR test</title>
+  <title>In-browser camera AR test</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.babylonjs.com/babylon.js"></script>
   <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
 </head>
 <body>
   <main class="viewer-shell">
-    <header class="viewer-bar"><a href="index.html">← Back</a><div><strong>Babylon.js WebXR</strong><small id="status">Loading model…</small></div></header>
+    <header class="viewer-bar"><a href="index.html">← Back</a><div class="viewer-title"><strong>Browser camera AR</strong><small id="status">Loading model…</small></div><button id="cameraButton" class="camera-action" type="button">Start camera</button></header>
+    <video id="cameraFeed" class="camera-feed" autoplay muted playsinline></video>
     <canvas id="renderCanvas" aria-label="Interactive AR scene"></canvas>
-    <p class="viewer-note">Android Chrome/WebXR test. Enter AR, move slowly until a surface is found, then tap to place the model.</p>
+    <p class="viewer-note"><b>Works inside this page:</b> start the camera, then drag to rotate and pinch to zoom the model. On WebXR devices, the AR headset button also enables tracked surface placement.</p>
   </main>
   <script src="babylon-ar.js"></script>
 </body>
