@@ -4,31 +4,26 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Open in AR</title>
-  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.1.0/model-viewer.min.js"></script>
   <style>
-    html, body { margin: 0; height: 100%; background: #e9edf2; font-family: system-ui, sans-serif; }
-    model-viewer { width: 100%; height: 100%; }
-    .ar-action { position: absolute; left: 50%; bottom: max(24px, env(safe-area-inset-bottom)); transform: translateX(-50%);
-      padding: 14px 28px; border: 0; border-radius: 8px; color: #fff; background: #244f82; font-size: 1rem; font-weight: 650; }
+    html, body { margin: 0; height: 100%; }
+    body { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px;
+      background: #e9edf2; color: #374256; font-family: system-ui, sans-serif; text-align: center; }
+    button { padding: 14px 28px; border: 0; border-radius: 8px; color: #fff; background: #244f82; font-size: 1rem; font-weight: 650; }
   </style>
 </head>
 <body>
-  <model-viewer id="viewer" camera-controls touch-action="pan-y" autoplay ar ar-modes="scene-viewer quick-look" shadow-intensity="1" exposure="1">
-    <button class="ar-action" slot="ar-button">Open in AR</button>
-  </model-viewer>
+  <p id="status">Opening AR…</p>
+  <button id="open">Open in AR</button>
   <script>
     // Standalone page. Put next to <Name>.glb + <Name>.usdz and open ar.html?model=<Name>.
-    // Auto-opens Scene Viewer (Android) / Quick Look (iOS) immediately on page open:
-    // browsers only allow it without a tap right after navigation, so don't wait for model-viewer to load.
+    // Auto-opens Quick Look (iOS) / Scene Viewer (Android) right on page open, nothing else is downloaded.
     const params = new URLSearchParams(location.search);
     const model = params.get('model') || '';
-    const viewer = document.getElementById('viewer');
-    if (/^[\w-]+$/.test(model)) { // plain file name only, no paths
-      viewer.src = `${model}.glb`;
-      viewer.setAttribute('ios-src', `${model}.usdz`);
-      const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent)
-        || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-      const isAndroid = /Android/i.test(navigator.userAgent);
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent)
+      || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const isAndroid = /Android/i.test(navigator.userAgent);
+
+    function openAR() {
       if (isIOS) {
         const link = document.createElement('a');
         link.rel = 'ar';
@@ -37,17 +32,29 @@
         document.body.appendChild(link);
         link.click();
         link.remove();
-      } else if (isAndroid && !params.has('noar')) { // noar: came back via fallback, don't loop
-        params.set('noar', '1');
+      } else if (isAndroid) {
+        const back = new URLSearchParams(params);
+        back.set('noar', '1'); // returning via fallback must not auto-launch again (loop)
         const file = encodeURIComponent(new URL(`${model}.glb`, location.href).href);
-        const fallback = encodeURIComponent(`${location.origin}${location.pathname}?${params}`);
+        const fallback = encodeURIComponent(`${location.origin}${location.pathname}?${back}`);
         location.href = `intent://arvr.google.com/scene-viewer/1.0?file=${file}&mode=ar_preferred`
           + '#Intent;scheme=https;package=com.google.android.googlequicksearchbox;'
           + `action=android.intent.action.VIEW;S.browser_fallback_url=${fallback};end;`;
       }
-      // If the launch was blocked, the model preview and AR button stay on the page.
+    }
+
+    const status = document.getElementById('status');
+    const button = document.getElementById('open');
+    if (!/^[\w-]+$/.test(model)) { // plain file name only, no paths
+      status.textContent = 'Add ?model=<Name> to the URL.';
+      button.remove();
+    } else if (!isIOS && !isAndroid) {
+      status.textContent = 'Open this link on an iPhone, iPad or Android phone.';
+      button.remove();
     } else {
-      document.body.textContent = 'Add ?model=<Name> to the URL.';
+      button.addEventListener('click', openAR);
+      if (params.has('noar')) status.textContent = 'AR viewer is not available. Tap to try again.';
+      else openAR();
     }
   </script>
 </body>
