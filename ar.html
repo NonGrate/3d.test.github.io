@@ -38,7 +38,7 @@
         const file = encodeURIComponent(new URL(`${model}.glb`, location.href).href);
         const fallback = encodeURIComponent(`${location.origin}${location.pathname}?${back}`);
         location.href = `intent://arvr.google.com/scene-viewer/1.0?file=${file}&mode=ar_preferred`
-          + '#Intent;scheme=https;package=com.google.android.googlequicksearchbox;'
+          + '#Intent;scheme=https;package=com.google.ar.core;' // ARCore hosts Scene Viewer; the Google app one crashes
           + `action=android.intent.action.VIEW;S.browser_fallback_url=${fallback};end;`;
       }
     }
