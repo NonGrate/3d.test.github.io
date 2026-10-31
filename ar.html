@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Open in AR</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.1.0/model-viewer.min.js"></script>
+</head>
+<body>
+  <main class="viewer-shell">
+    <model-viewer id="viewer" camera-controls touch-action="pan-y" autoplay ar ar-modes="scene-viewer quick-look" shadow-intensity="1" exposure="1">
+      <button class="ar-action" slot="ar-button">Open in AR</button>
+    </model-viewer>
+  </main>
+  <script>
+    // QR target: ar.html?model=<Name>. Auto-opens Scene Viewer (Android) / Quick Look (iOS).
+    const models = ['Shiba', 'Island', 'Solar_System_Animated_Rigged'];
+    const requested = new URLSearchParams(location.search).get('model');
+    const model = models.includes(requested) ? requested : 'Shiba';
+    const viewer = document.getElementById('viewer');
+    viewer.src = `${model}.glb`;
+    viewer.setAttribute('ios-src', `${model}.usdz`);
+    // Browser may block launch without a user tap; the AR button stays as fallback.
+    viewer.addEventListener('load', () => { if (viewer.canActivateAR) viewer.activateAR(); }, { once: true });
+  </script>
+</body>
+</html>
