@@ -8,6 +8,8 @@
     html, body { margin: 0; height: 100%; }
     body { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px;
       background: #e9edf2; color: #374256; font-family: system-ui, sans-serif; text-align: center; }
+    model-viewer { width: 100%; height: 100%; }
+    model-viewer button { position: absolute; left: 50%; bottom: max(24px, env(safe-area-inset-bottom)); transform: translateX(-50%); }
     button { padding: 14px 28px; border: 0; border-radius: 8px; color: #fff; background: #244f82; font-size: 1rem; font-weight: 650; }
   </style>
 </head>
@@ -16,7 +18,7 @@
   <button id="open">Open in AR</button>
   <script>
     // Standalone page. Put next to <Name>.glb + <Name>.usdz and open ar.html?model=<Name>.
-    // Auto-opens Quick Look (iOS) / Scene Viewer (Android) right on page open, nothing else is downloaded.
+    // Auto-opens Quick Look (iOS) right on page open, nothing else is downloaded.
     const params = new URLSearchParams(location.search);
     const model = params.get('model') || '';
     const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent)
@@ -32,16 +34,20 @@
         document.body.appendChild(link);
         link.click();
         link.remove();
-      } else if (isAndroid) {
-        const back = new URLSearchParams(params);
-        back.set('noar', '1'); // returning via fallback must not auto-launch again (loop)
-        const file = encodeURIComponent(new URL(`${model}.glb`, location.href).href);
-        const fallback = encodeURIComponent(`${location.origin}${location.pathname}?${back}`);
-        // Same intent as model-viewer 4.1. Our older 1.0 intent without disable_occlusion crashed the Google app ("Google keeps stopping").
-        location.href = `intent://arvr.google.com/scene-viewer/1.2?mode=ar_preferred&disable_occlusion=true&file=${file}`
-          + '#Intent;scheme=https;package=com.google.android.googlequicksearchbox;'
-          + `action=android.intent.action.VIEW;S.browser_fallback_url=${fallback};end;`;
       }
+    }
+
+    // ponytail: temporary. Scene Viewer in the Google app closes right after launch
+    // (google-ar/arcore-android-sdk#1795), so Android uses model-viewer: WebXR in Chrome, needs one tap.
+    // Revert this commit to get the Scene Viewer auto-launch back once Google fixes it.
+    function showModelViewer() {
+      document.body.innerHTML = '<model-viewer ar camera-controls touch-action="pan-y" shadow-intensity="1">'
+        + '<button slot="ar-button">Open in AR</button></model-viewer>';
+      document.querySelector('model-viewer').src = `${model}.glb`;
+      const script = document.createElement('script');
+      script.type = 'module';
+      script.src = 'https://ajax.googleapis.com/ajax/libs/model-viewer/4.4.0/model-viewer.min.js';
+      document.head.appendChild(script);
     }
 
     const status = document.getElementById('status');
@@ -52,10 +58,11 @@
     } else if (!isIOS && !isAndroid) {
       status.textContent = 'Open this link on an iPhone, iPad or Android phone.';
       button.remove();
+    } else if (isAndroid) {
+      showModelViewer();
     } else {
       button.addEventListener('click', openAR);
-      if (params.has('noar')) status.textContent = 'AR viewer is not available. Tap to try again.';
-      else openAR();
+      openAR();
     }
   </script>
 </body>
