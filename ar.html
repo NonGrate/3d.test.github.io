@@ -41,7 +41,7 @@
     // (google-ar/arcore-android-sdk#1795), so Android uses model-viewer: WebXR in Chrome, needs one tap.
     // Revert this commit to get the Scene Viewer auto-launch back once Google fixes it.
     function showModelViewer() {
-      document.body.innerHTML = '<model-viewer ar camera-controls touch-action="pan-y" shadow-intensity="1">'
+      document.body.innerHTML = '<model-viewer ar autoplay camera-controls touch-action="pan-y" shadow-intensity="1">'
         + '<button slot="ar-button">Open in AR</button></model-viewer>';
       document.querySelector('model-viewer').src = `${model}.glb`;
       const script = document.createElement('script');
